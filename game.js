@@ -272,6 +272,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'SELECT') return; // el selector de skin usa sus propias teclas
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {

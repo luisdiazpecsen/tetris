@@ -237,9 +237,9 @@ kbd {
 }
 
 .skin-picker select {
-  background: var(--board-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: var(--kbd-bg);
+  color: var(--kbd-text);
+  border: 1px solid var(--kbd-border);
   border-radius: 6px;
   padding: 7px 10px;
   font-size: 13px;
