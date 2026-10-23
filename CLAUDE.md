@@ -19,6 +19,8 @@ All game logic lives in `game.js`, a single `'use strict'` script loaded by `ind
 - **Rotation**: `rotateCW` (transpose + reverse) plus wall kicks `[0, -1, 1, -2, 2]` in `tryRotate`; no kick table per piece.
 - **Scoring / speed**: soft drop +1 per cell, hard drop +2 per cell, line clears use `LINE_SCORES[n] * level`. Level = `floor(lines / 10) + 1`; `dropInterval = max(100, 1000 − (level−1)·90)`. The initial 1000 is hardcoded in both `init()` and `clearLines()`, so change both.
 
+- **Theme**: colors live as CSS variables in `style.css` (`:root` = dark, `[data-theme="light"]` = light). `applyTheme` in `game.js` sets `data-theme`, caches `--grid` into `gridColor` (used by `drawGrid`) and persists to `localStorage`. New colors should use variables, not hardcoded values.
+
 ## Gotchas
 
 - Canvas dimensions are hardcoded in `index.html` (`#board` 300×600, `#next-canvas` 120×120). If you change `COLS`, `ROWS` or `BLOCK`, update the canvas `width`/`height` to `COLS*BLOCK` × `ROWS*BLOCK`. `drawNext` assumes a 4×4 grid at 30px per cell.
