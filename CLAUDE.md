@@ -15,9 +15,9 @@ All game logic lives in `game.js`, a single `'use strict'` script loaded by `ind
 - **Board / pieces**: `board` is a `ROWS × COLS` matrix holding `0` (empty) or a color index 1–7. `PIECES` and `COLORS` are indexed identically (index 0 is `null`), so a cell value doubles as piece type and color.
 - **Piece lifecycle**: `loop` (rAF, accumulates `dropAccum` against `dropInterval`) → `lockPiece` → `merge` → `clearLines` → `spawn`. `spawn` promotes `next` to `current`, and calls `endGame` if the new piece already collides. `softDrop` and `hardDrop` also end in `lockPiece`.
 - **State**: mutable globals are declared on one line (`let board, current, next, ...`) and fully reset in `init()`, which the restart button re-calls. `init()` cancels any previous rAF before starting a new loop.
-- **Pause**: `togglePause` cancels/restarts the rAF loop itself (resetting `lastTime`); the `keydown` handler ignores input while `paused` or `gameOver`.
+- **Pause**: `P` or `Escape` call `togglePause`, which cancels/restarts the rAF loop itself (resetting `lastTime`) and shows/hides the pause menu (`#pause-menu` inside `#overlay`: resume, restart, controls view, start-level select); the `keydown` handler ignores game input while `paused` or `gameOver`. `startLevel` (menu select, 1–15) is applied by `init()`.
 - **Rotation**: `rotateCW` (transpose + reverse) plus wall kicks `[0, -1, 1, -2, 2]` in `tryRotate`; no kick table per piece.
-- **Scoring / speed**: soft drop +1 per cell, hard drop +2 per cell, line clears use `LINE_SCORES[n] * level`. Level = `floor(lines / 10) + 1`; `dropInterval = max(100, 1000 − (level−1)·90)`. The initial 1000 is hardcoded in both `init()` and `clearLines()`, so change both.
+- **Scoring / speed**: soft drop +1 per cell, hard drop +2 per cell, line clears use `LINE_SCORES[n] * level`. Level = `startLevel + floor(lines / 10)`; `dropInterval = intervalForLevel(level)` = `max(100, 1000 − (level−1)·90)`, used by both `init()` and `clearLines()`.
 
 - **Theme**: colors live as CSS variables in `style.css` (`:root` = dark, `[data-theme="light"]` = light). `applyTheme` in `game.js` sets `data-theme`, caches `--grid` into `gridColor` (used by `drawGrid`) and persists to `localStorage`. New colors should use variables, not hardcoded values.
 
