@@ -159,13 +159,9 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const skin = SKINS[currentSkin];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  skin.draw(context, x * size, y * size, skin.colors[colorIndex], size);
   context.globalAlpha = 1;
 }
 
@@ -276,6 +272,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'SELECT') return; // el selector de skin usa sus propias teclas
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -321,5 +318,95 @@ themeBtn.addEventListener('click', () => {
 let savedTheme = null;
 try { savedTheme = localStorage.getItem('theme'); } catch (e) {}
 applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+
+// ---- Skins visuales ----
+function roundedRectPath(context, x, y, w, h, r) {
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + w, y, x + w, y + h, r);
+  context.arcTo(x + w, y + h, x, y + h, r);
+  context.arcTo(x, y + h, x, y, r);
+  context.arcTo(x, y, x + w, y, r);
+  context.closePath();
+}
+
+const SKINS = {
+  retro: {
+    colors: COLORS,
+    draw(context, px, py, color, size) {
+      context.fillStyle = color;
+      context.fillRect(px + 1, py + 1, size - 2, size - 2);
+      context.fillStyle = 'rgba(255,255,255,0.12)';
+      context.fillRect(px + 1, py + 1, size - 2, 4);
+    },
+  },
+  neon: {
+    colors: [null, '#00f0ff', '#fff700', '#d500f9', '#39ff14', '#ff1744', '#448aff', '#ff9100'],
+    draw(context, px, py, color, size) {
+      context.shadowColor = color;
+      context.shadowBlur = size * 0.6;
+      context.fillStyle = color;
+      context.fillRect(px + 3, py + 3, size - 6, size - 6);
+      context.shadowBlur = 0;
+      context.shadowColor = 'transparent';
+      context.fillStyle = 'rgba(255,255,255,0.35)';
+      context.fillRect(px + 6, py + 6, size - 12, size - 12);
+    },
+  },
+  pastel: {
+    colors: [null, '#b5ead7', '#fff1b8', '#d7c0f0', '#c7f0c2', '#ffc2c7', '#bde0fe', '#ffd9b3'],
+    draw(context, px, py, color, size) {
+      context.fillStyle = color;
+      roundedRectPath(context, px + 1.5, py + 1.5, size - 3, size - 3, size * 0.3);
+      context.fill();
+      context.fillStyle = 'rgba(255,255,255,0.35)';
+      roundedRectPath(context, px + 5, py + 4, size - 10, size * 0.18, size * 0.09);
+      context.fill();
+    },
+  },
+  pixel: {
+    colors: [null, '#29b6d0', '#f2c230', '#a64bc0', '#4caf50', '#d84a4a', '#4a8fd8', '#e68a1f'],
+    draw(context, px, py, color, size) {
+      context.fillStyle = color;
+      context.fillRect(px, py, size, size);
+      // textura: tablero de "pixeles" claros y oscuros
+      const cell = size / 5;
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+          if ((i + j) % 2) continue;
+          context.fillStyle = (i + j) % 4 ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.18)';
+          context.fillRect(px + i * cell, py + j * cell, cell, cell);
+        }
+      }
+      context.strokeStyle = 'rgba(0,0,0,0.6)';
+      context.lineWidth = 2;
+      context.strokeRect(px + 1, py + 1, size - 2, size - 2);
+    },
+  },
+};
+
+let currentSkin = 'retro';
+const skinSelect = document.getElementById('skin-select');
+
+function applySkin(skin) {
+  if (!SKINS[skin]) skin = 'retro';
+  currentSkin = skin;
+  document.documentElement.dataset.skin = skin;
+  gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
+  skinSelect.value = skin;
+  try { localStorage.setItem('skin', skin); } catch (e) {}
+  // redibuja al instante (también en pausa / game over, con el loop detenido)
+  if (board && current) draw();
+  if (next) drawNext();
+}
+
+skinSelect.addEventListener('change', () => {
+  applySkin(skinSelect.value);
+  skinSelect.blur(); // evita que el selector capture Space (caída dura)
+});
+
+let savedSkin = null;
+try { savedSkin = localStorage.getItem('skin'); } catch (e) {}
+applySkin(savedSkin);
 
 init();
