@@ -222,3 +222,46 @@ kbd {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ---- Skins ---- */
+.skin-picker {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.skin-picker select {
+  background: var(--board-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.skin-picker select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[data-skin="neon"] {
+  --board-bg: #000000;
+  --grid: #14142a;
+  --border: #1f3a4a;
+}
+
+[data-skin="pastel"] {
+  --grid: rgba(150, 150, 170, 0.18);
+}
+
+[data-skin="pixel"] {
+  --grid: rgba(128, 128, 128, 0.2);
+}
